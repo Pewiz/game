@@ -1,384 +1,294 @@
 import { useEffect, useRef, useState } from "react";
+import { createGame } from "odyc";
 
-function GameComponent() {
-  const canvasRef = useRef(null);
-  const gameStateRef = useRef(null);
-  const animationFrameRef = useRef(null);
-  const [score, setScore] = useState(0);
-  const [gameOver, setGameOver] = useState(false);
-  const [finalScore, setFinalScore] = useState(0);
+function ComponenteJuego() {
+  const gameContainerRef = useRef(null);
+  const [puntos, setPuntos] = useState(0);
+  const [juegoTerminado, setJuegoTerminado] = useState(false);
+  const [nivel, setNivel] = useState(1);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const container = gameContainerRef.current;
+    if (!container) return;
 
-    const ctx = canvas.getContext("2d");
-    canvas.width = 800;
-    canvas.height = 600;
+    // 🎮 VARIABLES DEL JUEGO - ¡Los estudiantes pueden cambiar estos valores!
+    let puntosActuales = 0;
+    let VELOCIDAD_OBSTACULOS = 1; // Variable para controlar la velocidad (puede usarse en futuras versiones)
+    let nivelActual = 1;
+    let obstaculosEsquivados = 0;
 
-    // Configuración del juego
-    const GAME_CONFIG = {
-      CANVAS_WIDTH: 800,
-      CANVAS_HEIGHT: 600,
-      CAR_WIDTH: 50,
-      CAR_HEIGHT: 80,
-      CAR_SPEED: 8,
-      BLOCK_SPEED: 5,
-      BLOCK_WIDTH: 80,
-      BLOCK_HEIGHT: 80,
-      AI_WATCH_DISTANCE: 150,
-    };
+    // 🎯 CREAR EL JUEGO CON ODYC.JS
+    const juego = createGame({
+      title: "🏎️ Esquiva los Obstáculos",
 
-    // Colores
-    const COLORS = {
-      RED: "#FF0000",
-      YELLOW: "#FFFF00",
-      GREEN: "#00FF00",
-      WHITE: "#FFFFFF",
-      BLACK: "#000000",
-      GRAY: "#808080",
-    };
-
-    // Estado inicial del juego
-    gameStateRef.current = {
-      car: {
-        x: (GAME_CONFIG.CANVAS_WIDTH - GAME_CONFIG.CAR_WIDTH) / 2,
-        y: GAME_CONFIG.CANVAS_HEIGHT - GAME_CONFIG.CAR_HEIGHT - 10,
-        width: GAME_CONFIG.CAR_WIDTH,
-        height: GAME_CONFIG.CAR_HEIGHT,
+      // 🚗 JUGADOR - Nuestro auto azul
+      player: {
+        sprite: `
+          🚙
+        `,
+        position: [4, 9], // Posición inicial (columna 4, fila 9)
+        solid: true,
       },
-      block: {
-        x: Math.random() * (GAME_CONFIG.CANVAS_WIDTH - GAME_CONFIG.BLOCK_WIDTH),
-        y: -GAME_CONFIG.BLOCK_HEIGHT,
-        width: GAME_CONFIG.BLOCK_WIDTH,
-        height: GAME_CONFIG.BLOCK_HEIGHT,
-        color: [COLORS.RED, COLORS.YELLOW, COLORS.GREEN][
-          Math.floor(Math.random() * 3)
-        ],
-        speed: GAME_CONFIG.BLOCK_SPEED,
+
+      // 🗺️ MAPA DEL JUEGO - La carretera donde jugamos
+      map: `
+        ##########
+        #........#
+        #........#
+        #........#
+        #........#
+        #........#
+        #........#
+        #........#
+        #........#
+        #........#
+      `,
+
+      // 🎨 PLANTILLAS - Definimos los elementos del juego
+      templates: {
+        // 🧱 Bordes de la carretera
+        "#": {
+          sprite: "🟫",
+          solid: true,
+        },
+
+        // 🟥 Obstáculo rojo - ¡Evítalo!
+        R: {
+          sprite: "🟥",
+          solid: true,
+          onTouch: () => {
+            // ¡Game Over!
+            setJuegoTerminado(true);
+            return {
+              dialog: "💥 ¡Chocaste! Presiona R para reiniciar",
+            };
+          },
+        },
+
+        // 🟩 Obstáculo verde - ¡Recoléctalo!
+        G: {
+          sprite: "🟩",
+          onTouch: () => {
+            puntosActuales += 5;
+            setPuntos(puntosActuales);
+            // Remover el obstáculo verde cuando lo tocamos
+            return { remove: true };
+          },
+        },
       },
-      score: 0,
-      isPlaying: true,
-      keys: {},
-    };
 
-    // Manejo de teclas
-    const handleKeyDown = (e) => {
-      gameStateRef.current.keys[e.key] = true;
-    };
+      // 🎨 CONFIGURACIÓN VISUAL
+      config: {
+        background: "#87CEEB", // Cielo azul
+        cellSize: 40,
+        screen: {
+          width: 400,
+          height: 400,
+        },
+      },
 
-    const handleKeyUp = (e) => {
-      gameStateRef.current.keys[e.key] = false;
-    };
+      // 🎮 EVENTOS DEL JUEGO
+      events: {
+        // ⏰ Cada segundo, generar nuevos obstáculos
+        onTick: () => {
+          // Mover obstáculos hacia abajo
+          moverObstaculos();
 
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("keyup", handleKeyUp);
-
-    // Funciones del juego
-    const drawCar = (car) => {
-      // Dibujar auto como rectángulo azul con detalles
-      ctx.fillStyle = "#4A90E2";
-      ctx.fillRect(car.x, car.y, car.width, car.height);
-
-      // Ventanas
-      ctx.fillStyle = "#87CEEB";
-      ctx.fillRect(car.x + 10, car.y + 10, car.width - 20, 20);
-
-      // Ruedas
-      ctx.fillStyle = COLORS.BLACK;
-      ctx.fillRect(car.x + 5, car.y + car.height - 15, 10, 10);
-      ctx.fillRect(car.x + car.width - 15, car.y + car.height - 15, 10, 10);
-    };
-
-    const drawBlock = (block) => {
-      ctx.fillStyle = block.color;
-      ctx.fillRect(block.x, block.y, block.width, block.height);
-
-      // Borde para mejor visibilidad
-      ctx.strokeStyle = COLORS.BLACK;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(block.x, block.y, block.width, block.height);
-    };
-
-    const drawScore = (currentScore) => {
-      ctx.fillStyle = COLORS.BLACK;
-      ctx.font = "24px Arial";
-      ctx.fillText(`Puntaje: ${currentScore}`, 20, 40);
-    };
-
-    const drawBackground = () => {
-      // Fondo degradado
-      const gradient = ctx.createLinearGradient(
-        0,
-        0,
-        0,
-        GAME_CONFIG.CANVAS_HEIGHT
-      );
-      gradient.addColorStop(0, "#87CEEB");
-      gradient.addColorStop(1, "#98FB98");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, GAME_CONFIG.CANVAS_WIDTH, GAME_CONFIG.CANVAS_HEIGHT);
-
-      // Líneas de carretera
-      ctx.strokeStyle = COLORS.WHITE;
-      ctx.lineWidth = 4;
-      ctx.setLineDash([20, 20]);
-      ctx.beginPath();
-      ctx.moveTo(GAME_CONFIG.CANVAS_WIDTH / 3, 0);
-      ctx.lineTo(GAME_CONFIG.CANVAS_WIDTH / 3, GAME_CONFIG.CANVAS_HEIGHT);
-      ctx.moveTo((GAME_CONFIG.CANVAS_WIDTH * 2) / 3, 0);
-      ctx.lineTo((GAME_CONFIG.CANVAS_WIDTH * 2) / 3, GAME_CONFIG.CANVAS_HEIGHT);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    };
-
-    const checkCollision = (car, block) => {
-      return (
-        car.x < block.x + block.width &&
-        car.x + car.width > block.x &&
-        car.y < block.y + block.height &&
-        car.y + car.height > block.y
-      );
-    };
-
-    const resetBlock = () => {
-      const gameState = gameStateRef.current;
-      gameState.block.x =
-        Math.random() * (GAME_CONFIG.CANVAS_WIDTH - GAME_CONFIG.BLOCK_WIDTH);
-      gameState.block.y = -GAME_CONFIG.BLOCK_HEIGHT;
-      gameState.block.speed += 0.5; // Incrementar dificultad
-      gameState.block.width = Math.random() * 100 + 50; // Tamaño variable
-      gameState.block.color = [COLORS.RED, COLORS.YELLOW, COLORS.GREEN][
-        Math.floor(Math.random() * 3)
-      ];
-    };
-
-    const updateGame = () => {
-      if (!gameStateRef.current.isPlaying) return;
-
-      const gameState = gameStateRef.current;
-      const { car, block, keys } = gameState;
-
-      // Movimiento del auto
-      if (keys["ArrowLeft"] && car.x > 0) {
-        car.x -= GAME_CONFIG.CAR_SPEED;
-      }
-      if (keys["ArrowRight"] && car.x + car.width < GAME_CONFIG.CANVAS_WIDTH) {
-        car.x += GAME_CONFIG.CAR_SPEED;
-      }
-
-      // Movimiento del bloque
-      block.y += block.speed;
-
-      // Si el bloque sale de pantalla
-      if (block.y > GAME_CONFIG.CANVAS_HEIGHT) {
-        resetBlock();
-        gameState.score += 1;
-        setScore(gameState.score);
-      }
-
-      // IA Simple - Esquivar bloques rojos y amarillos, perseguir verdes
-      const distanceToBlock = car.y - (block.y + block.height);
-      if (
-        distanceToBlock < GAME_CONFIG.AI_WATCH_DISTANCE &&
-        distanceToBlock > 0
-      ) {
-        const carCenter = car.x + car.width / 2;
-        const blockCenter = block.x + block.width / 2;
-
-        if (block.color === COLORS.GREEN) {
-          // Perseguir bloques verdes
-          if (
-            carCenter < blockCenter &&
-            car.x + car.width < GAME_CONFIG.CANVAS_WIDTH
-          ) {
-            car.x += GAME_CONFIG.CAR_SPEED / 2;
-          } else if (carCenter > blockCenter && car.x > 0) {
-            car.x -= GAME_CONFIG.CAR_SPEED / 2;
+          // Generar nuevos obstáculos
+          if (Math.random() < 0.3) {
+            // 30% de probabilidad
+            generarObstaculo();
           }
-        } else if (
-          block.color === COLORS.RED ||
-          block.color === COLORS.YELLOW
-        ) {
-          // Esquivar bloques rojos y amarillos
-          if (
-            Math.abs(carCenter - blockCenter) <
-            (car.width + block.width) / 2
-          ) {
-            if (carCenter < blockCenter && car.x > 0) {
-              car.x -= GAME_CONFIG.CAR_SPEED;
-            } else if (
-              carCenter > blockCenter &&
-              car.x + car.width < GAME_CONFIG.CANVAS_WIDTH
-            ) {
-              car.x += GAME_CONFIG.CAR_SPEED;
+
+          // Aumentar dificultad cada 10 obstáculos esquivados
+          if (obstaculosEsquivados > 0 && obstaculosEsquivados % 10 === 0) {
+            nivelActual++;
+            VELOCIDAD_OBSTACULOS += 0.2;
+            setNivel(nivelActual);
+          }
+        },
+
+        // ⌨️ CONTROLES - Mover el auto con las flechas
+        onKey: (key) => {
+          const player = juego.getPlayer();
+          const [x, y] = player.position;
+
+          switch (key) {
+            case "ArrowLeft":
+              if (x > 1) {
+                // No salirse del borde izquierdo
+                juego.movePlayer([x - 1, y]);
+              }
+              break;
+            case "ArrowRight":
+              if (x < 8) {
+                // No salirse del borde derecho
+                juego.movePlayer([x + 1, y]);
+              }
+              break;
+            case "r":
+            case "R":
+              if (juegoTerminado) {
+                reiniciarJuego();
+              }
+              break;
+          }
+        },
+      },
+    });
+
+    // 🚀 FUNCIÓN PARA GENERAR OBSTÁCULOS
+    function generarObstaculo() {
+      const columnaAleatoria = Math.floor(Math.random() * 8) + 1; // Columnas 1-8
+      const tipoObstaculo = Math.random() > 0.7 ? "G" : "R"; // 70% rojos, 30% verdes
+
+      // Agregar obstáculo en la parte superior
+      juego.setCell([columnaAleatoria, 0], tipoObstaculo);
+    }
+
+    // ⬇️ FUNCIÓN PARA MOVER OBSTÁCULOS HACIA ABAJO
+    function moverObstaculos() {
+      const mapa = juego.getMap();
+
+      // Recorrer desde abajo hacia arriba para evitar duplicados
+      for (let fila = 9; fila >= 0; fila--) {
+        for (let columna = 1; columna <= 8; columna++) {
+          const celda = mapa[fila][columna];
+
+          if (celda === "R" || celda === "G") {
+            // Limpiar la celda actual
+            juego.setCell([columna, fila], ".");
+
+            // Mover hacia abajo
+            if (fila < 9) {
+              juego.setCell([columna, fila + 1], celda);
+            } else {
+              // Si llegó al final, contar como obstáculo esquivado
+              if (celda === "R") {
+                obstaculosEsquivados++;
+                puntosActuales += 1;
+                setPuntos(puntosActuales);
+              }
             }
           }
         }
       }
+    }
 
-      // Verificar colisiones
-      if (checkCollision(car, block)) {
-        if (block.color === COLORS.RED) {
-          // Game Over
-          gameState.isPlaying = false;
-          setGameOver(true);
-          setFinalScore(gameState.score);
-        } else if (block.color === COLORS.YELLOW) {
-          // Perder puntos
-          gameState.score = Math.max(0, gameState.score - 2);
-          setScore(gameState.score);
-          resetBlock();
-        } else if (block.color === COLORS.GREEN) {
-          // Ganar puntos
-          gameState.score += 5;
-          setScore(gameState.score);
-          resetBlock();
+    // 🔄 FUNCIÓN PARA REINICIAR EL JUEGO
+    function reiniciarJuego() {
+      puntosActuales = 0;
+      VELOCIDAD_OBSTACULOS = 1;
+      nivelActual = 1;
+      obstaculosEsquivados = 0;
+
+      setPuntos(0);
+      setNivel(1);
+      setJuegoTerminado(false);
+
+      // Limpiar todos los obstáculos del mapa
+      for (let fila = 0; fila < 10; fila++) {
+        for (let columna = 1; columna <= 8; columna++) {
+          juego.setCell([columna, fila], ".");
         }
       }
-    };
 
-    const render = () => {
-      const gameState = gameStateRef.current;
+      // Resetear posición del jugador
+      juego.movePlayer([4, 9]);
+    }
 
-      drawBackground();
-      drawCar(gameState.car);
-      drawBlock(gameState.block);
-      drawScore(gameState.score);
+    // 🎯 INICIAR EL JUEGO
+    juego.mount(container);
 
-      if (!gameState.isPlaying) {
-        // Pantalla de Game Over
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(0, 0, GAME_CONFIG.CANVAS_WIDTH, GAME_CONFIG.CANVAS_HEIGHT);
-
-        ctx.fillStyle = COLORS.WHITE;
-        ctx.font = "48px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(
-          "¡GAME OVER!",
-          GAME_CONFIG.CANVAS_WIDTH / 2,
-          GAME_CONFIG.CANVAS_HEIGHT / 2 - 50
-        );
-
-        ctx.font = "24px Arial";
-        ctx.fillText(
-          `Puntaje Final: ${gameState.score}`,
-          GAME_CONFIG.CANVAS_WIDTH / 2,
-          GAME_CONFIG.CANVAS_HEIGHT / 2 + 20
-        );
-        ctx.fillText(
-          "Presiona R para reiniciar",
-          GAME_CONFIG.CANVAS_WIDTH / 2,
-          GAME_CONFIG.CANVAS_HEIGHT / 2 + 60
-        );
-        ctx.textAlign = "left";
-      }
-    };
-
-    const gameLoop = () => {
-      updateGame();
-      render();
-      animationFrameRef.current = requestAnimationFrame(gameLoop);
-    };
-
-    // Reiniciar juego
-    const handleRestart = (e) => {
-      if (e.key === "r" || e.key === "R") {
-        gameStateRef.current = {
-          car: {
-            x: (GAME_CONFIG.CANVAS_WIDTH - GAME_CONFIG.CAR_WIDTH) / 2,
-            y: GAME_CONFIG.CANVAS_HEIGHT - GAME_CONFIG.CAR_HEIGHT - 10,
-            width: GAME_CONFIG.CAR_WIDTH,
-            height: GAME_CONFIG.CAR_HEIGHT,
-          },
-          block: {
-            x:
-              Math.random() *
-              (GAME_CONFIG.CANVAS_WIDTH - GAME_CONFIG.BLOCK_WIDTH),
-            y: -GAME_CONFIG.BLOCK_HEIGHT,
-            width: GAME_CONFIG.BLOCK_WIDTH,
-            height: GAME_CONFIG.BLOCK_HEIGHT,
-            color: [COLORS.RED, COLORS.YELLOW, COLORS.GREEN][
-              Math.floor(Math.random() * 3)
-            ],
-            speed: GAME_CONFIG.BLOCK_SPEED,
-          },
-          score: 0,
-          isPlaying: true,
-          keys: {},
-        };
-        setScore(0);
-        setGameOver(false);
-        setFinalScore(0);
-      }
-    };
-
-    document.addEventListener("keydown", handleRestart);
-
-    // Iniciar el juego
-    gameLoop();
-
+    // Limpiar cuando el componente se desmonte
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("keyup", handleKeyUp);
-      document.removeEventListener("keydown", handleRestart);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (container.firstChild) {
+        container.removeChild(container.firstChild);
       }
     };
-  }, []);
+  }, [juegoTerminado]); // Agregar juegoTerminado como dependencia
 
   return (
     <div className="flex flex-col items-center justify-center p-8 bg-gray-100 min-h-[700px]">
       <div className="mb-6 text-center">
         <h2 className="text-3xl font-bold text-gray-800 mb-2">
-          🏎️ Esquiva los Obstáculos
+          🏎️ ¡Esquiva los Obstáculos!
         </h2>
         <p className="text-gray-600 mb-4">
-          ¡El juego más inteligente del planeta! (Con IA incluida 🤖)
+          ¡Tu primer videojuego creado con Odyc.js!
         </p>
-        <div className="flex justify-center space-x-8 text-sm">
+
+        {/* 📊 ESTADÍSTICAS DEL JUEGO */}
+        <div className="flex justify-center space-x-6 mb-4">
+          <div className="bg-blue-100 px-4 py-2 rounded-lg">
+            <span className="font-bold text-blue-800">Puntos: {puntos}</span>
+          </div>
+          <div className="bg-purple-100 px-4 py-2 rounded-lg">
+            <span className="font-bold text-purple-800">Nivel: {nivel}</span>
+          </div>
+        </div>
+
+        {/* 🎯 EXPLICACIÓN DE LOS ELEMENTOS */}
+        <div className="flex justify-center space-x-6 text-sm">
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-red-500"></div>
-            <span>¡Evita! (Game Over)</span>
+            <span className="text-2xl">🟥</span>
+            <span className="font-semibold">¡Evita los rojos!</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-yellow-500"></div>
-            <span>¡Cuidado! (-2 puntos)</span>
+            <span className="text-2xl">🟩</span>
+            <span className="font-semibold">¡Recolecta los verdes!</span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 bg-green-500"></div>
-            <span>¡Recolecta! (+5 puntos)</span>
+            <span className="text-2xl">🚙</span>
+            <span className="font-semibold">¡Tu auto!</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-lg shadow-lg">
-        <canvas
-          ref={canvasRef}
-          className="border-2 border-gray-300 rounded"
-          style={{ display: "block" }}
+      {/* 🎮 ÁREA DEL JUEGO */}
+      <div className="bg-white p-6 rounded-lg shadow-lg">
+        <div
+          ref={gameContainerRef}
+          className="border-4 border-gray-400 rounded"
         />
       </div>
 
-      <div className="mt-4 text-center">
-        <div className="bg-blue-100 p-4 rounded-lg">
-          <p className="text-lg font-semibold">
-            Puntaje Actual: <span className="text-blue-600">{score}</span>
-          </p>
-          {gameOver && (
-            <p className="text-red-600 font-bold mt-2">
-              ¡Juego Terminado! Puntaje Final: {finalScore}
+      {/* 📖 INSTRUCCIONES */}
+      <div className="mt-6 text-center max-w-md">
+        {juegoTerminado && (
+          <div className="bg-red-100 p-4 rounded-lg mb-4">
+            <p className="text-red-600 font-bold text-lg">
+              💥 ¡Se acabó el juego!
             </p>
-          )}
+            <p className="text-red-600">Puntos finales: {puntos}</p>
+          </div>
+        )}
+
+        <div className="bg-yellow-50 p-4 rounded-lg text-sm">
+          <h3 className="font-bold text-lg mb-2">📖 Instrucciones:</h3>
+          <div className="space-y-1">
+            <p>
+              <strong>← →</strong> Mover el auto
+            </p>
+            <p>
+              <strong>R</strong> Reiniciar el juego
+            </p>
+            <p>
+              <strong>🟥 Rojos:</strong> ¡No los toques o pierdes!
+            </p>
+            <p>
+              <strong>🟩 Verdes:</strong> ¡Recoléctalos para +5 puntos!
+            </p>
+            <p>
+              <strong>🎯 Objetivo:</strong> ¡Esquiva obstáculos para subir de
+              nivel!
+            </p>
+          </div>
         </div>
-        <div className="mt-4 text-sm text-gray-600">
-          <p>
-            <strong>Controles:</strong> ← → para mover | R para reiniciar
-          </p>
-          <p>
-            <strong>IA Activada:</strong> El auto esquiva obstáculos
-            automáticamente
+
+        <div className="mt-4 bg-blue-50 p-3 rounded-lg text-xs">
+          <p className="font-semibold text-blue-800">
+            💡 ¡La dificultad aumenta cada 10 obstáculos esquivados!
           </p>
         </div>
       </div>
@@ -386,4 +296,4 @@ function GameComponent() {
   );
 }
 
-export default GameComponent;
+export default ComponenteJuego;

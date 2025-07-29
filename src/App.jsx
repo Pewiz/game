@@ -1,6 +1,6 @@
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import GameComponent from "./components/GameComponent";
+import ComponenteJuego from "./components/GameComponent";
 
 function App() {
   return (
@@ -8,7 +8,7 @@ function App() {
       <Header />
 
       <main className="flex-1">
-        <GameComponent />
+        <ComponenteJuego />
       </main>
 
       <Footer />
