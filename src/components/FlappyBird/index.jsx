@@ -9,9 +9,19 @@ const FlappyBird = () => {
   useEffect(() => {
     if (canvasRef.current && !gameRef.current && !initializedRef.current) {
       try {
-        // Inicializamos el juego
-        initializedRef.current = true;
-        gameRef.current = iniciarJuegoFlappyBird(canvasRef.current);
+        // Pequeño delay para evitar problemas con React StrictMode
+        const timeoutId = setTimeout(() => {
+          if (
+            canvasRef.current &&
+            !gameRef.current &&
+            !initializedRef.current
+          ) {
+            initializedRef.current = true;
+            gameRef.current = iniciarJuegoFlappyBird(canvasRef.current);
+          }
+        }, 100);
+
+        return () => clearTimeout(timeoutId);
       } catch (error) {
         console.error("Error inicializando el juego:", error);
         initializedRef.current = false;

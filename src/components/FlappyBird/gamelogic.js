@@ -2,32 +2,43 @@ import kaplay from "kaplay";
 
 // Variable global para rastrear si KAPLAY ya está inicializado
 let instanciaJuego = null;
+let canvasEnUso = null;
 
 export function iniciarJuegoFlappyBird(contenedor) {
-  // Si ya hay una instancia del juego, la limpiamos primero
-  if (instanciaJuego) {
+  // Si ya hay una instancia del juego en el mismo canvas, la devolvemos
+  if (instanciaJuego && canvasEnUso === contenedor) {
+    return instanciaJuego;
+  }
+
+  // Si hay una instancia anterior con diferente canvas, la limpiamos
+  if (instanciaJuego && canvasEnUso !== contenedor) {
     try {
       instanciaJuego.quit();
     } catch (error) {
       console.warn("Error limpiando instancia anterior del juego:", error);
     }
     instanciaJuego = null;
+    canvasEnUso = null;
   }
 
-  const k = kaplay({
-    canvas: contenedor,
-    width: 800,
-    height: 600,
-    background: [135, 206, 250], // Fondo azul cielo
-  });
+  // Solo crear nueva instancia si no existe
+  if (!instanciaJuego) {
+    const k = kaplay({
+      canvas: contenedor,
+      width: 800,
+      height: 600,
+      background: [135, 206, 250], // Fondo azul cielo
+    });
 
-  // Guardamos la instancia globalmente
-  instanciaJuego = k;
+    // Guardamos la instancia y el canvas globalmente
+    instanciaJuego = k;
+    canvasEnUso = contenedor;
+  }
 
   // Definimos la gravedad
-  k.setGravity(3200);
+  instanciaJuego.setGravity(3200);
 
-  k.scene("juego", () => {
+  instanciaJuego.scene("juego", () => {
     const ABERTURA_TUBO = 240;
     const TUBO_MINIMO = 60;
     const FUERZA_SALTO = 800;
@@ -35,153 +46,175 @@ export function iniciarJuegoFlappyBird(contenedor) {
     const TECHO = -60;
 
     // Creamos el pájaro usando formas básicas en lugar de sprites
-    const pajaro = k.add([
-      k.circle(16),
-      k.color(255, 215, 0), // Color dorado
-      k.pos(k.width() / 4, 0),
-      k.area(),
-      k.body(),
-      k.outline(2, k.Color.ORANGE),
+    const pajaro = instanciaJuego.add([
+      instanciaJuego.circle(16),
+      instanciaJuego.color(255, 215, 0), // Color dorado
+      instanciaJuego.pos(instanciaJuego.width() / 4, 0),
+      instanciaJuego.area(),
+      instanciaJuego.body(),
+      instanciaJuego.outline(2, instanciaJuego.Color.ORANGE),
     ]);
 
     // Agregamos ojos al pájaro
-    k.add([
-      k.circle(3),
-      k.color(0, 0, 0),
-      k.pos(k.width() / 4 - 6, -6),
-      k.follow(pajaro, k.vec2(-6, -6)),
+    instanciaJuego.add([
+      instanciaJuego.circle(3),
+      instanciaJuego.color(0, 0, 0),
+      instanciaJuego.pos(instanciaJuego.width() / 4 - 6, -6),
+      instanciaJuego.follow(pajaro, instanciaJuego.vec2(-6, -6)),
     ]);
+
+    // Variable para rastrear la puntuación
+    let puntuacion = 0;
 
     // Verificamos si el pájaro se cae y muere
     pajaro.onUpdate(() => {
-      if (pajaro.pos.y >= k.height() || pajaro.pos.y <= TECHO) {
-        k.go("perder", puntuacion);
+      if (pajaro.pos.y >= instanciaJuego.height() || pajaro.pos.y <= TECHO) {
+        instanciaJuego.go("perder", puntuacion);
       }
     });
 
-    // Controles de salto
-    k.onKeyPress("space", () => {
+    // Función para hacer saltar al pájaro
+    function saltar() {
       pajaro.jump(FUERZA_SALTO);
+    }
+
+    // Controles del pájaro
+    instanciaJuego.onKeyPress("space", () => {
+      saltar();
     });
 
-    k.onGamepadButtonPress("south", () => {
-      pajaro.jump(FUERZA_SALTO);
+    instanciaJuego.onGamepadButtonPress("south", () => {
+      saltar();
     });
 
-    // Toque móvil
-    k.onClick(() => {
-      pajaro.jump(FUERZA_SALTO);
+    // Control con clic del mouse
+    instanciaJuego.onClick(() => {
+      saltar();
     });
 
-    function generarTubo() {
-      // Calculamos las posiciones de los tubos
-      const h1 = k.rand(TUBO_MINIMO, k.height() - TUBO_MINIMO - ABERTURA_TUBO);
-      const h2 = k.height() - h1 - ABERTURA_TUBO;
+    // Función para generar tubos
+    function generarTubos() {
+      const h1 = instanciaJuego.rand(
+        TUBO_MINIMO,
+        instanciaJuego.height() - TUBO_MINIMO - ABERTURA_TUBO
+      );
+      const h2 = instanciaJuego.height() - h1 - ABERTURA_TUBO;
 
       // Tubo superior
-      k.add([
-        k.pos(k.width(), 0),
-        k.rect(64, h1),
-        k.color(0, 127, 255),
-        k.outline(4),
-        k.area(),
-        k.move(k.LEFT, VELOCIDAD),
-        k.offscreen({ destroy: true }),
+      instanciaJuego.add([
+        instanciaJuego.pos(instanciaJuego.width(), 0),
+        instanciaJuego.rect(64, h1),
+        instanciaJuego.color(0, 127, 255),
+        instanciaJuego.outline(4),
+        instanciaJuego.area(),
+        instanciaJuego.move(instanciaJuego.LEFT, VELOCIDAD),
+        instanciaJuego.offscreen({ destroy: true }),
         "tubo",
       ]);
 
       // Tubo inferior
-      k.add([
-        k.pos(k.width(), h1 + ABERTURA_TUBO),
-        k.rect(64, h2),
-        k.color(0, 127, 255),
-        k.outline(4),
-        k.area(),
-        k.move(k.LEFT, VELOCIDAD),
-        k.offscreen({ destroy: true }),
+      instanciaJuego.add([
+        instanciaJuego.pos(instanciaJuego.width(), h1 + ABERTURA_TUBO),
+        instanciaJuego.rect(64, h2),
+        instanciaJuego.color(0, 127, 255),
+        instanciaJuego.outline(4),
+        instanciaJuego.area(),
+        instanciaJuego.move(instanciaJuego.LEFT, VELOCIDAD),
+        instanciaJuego.offscreen({ destroy: true }),
         "tubo",
-        { pasado: false },
       ]);
     }
 
-    // Colisión con tubos
+    // Detectamos colisiones con los tubos
     pajaro.onCollide("tubo", () => {
-      k.go("perder", puntuacion);
-      k.addKaboom(pajaro.pos);
+      instanciaJuego.go("perder", puntuacion);
+      instanciaJuego.addKaboom(pajaro.pos);
     });
 
-    // Verificamos si el pájaro pasó el tubo
-    k.onUpdate("tubo", (t) => {
-      if (t.pos.x + t.width <= pajaro.pos.x && t.pasado === false) {
-        agregarPunto();
-        t.pasado = true;
+    // Detectamos cuando el pájaro pasa por un tubo para incrementar puntuación
+    instanciaJuego.onUpdate("tubo", (t) => {
+      if (t.pos.x + t.width <= pajaro.pos.x && t.puntuado !== true) {
+        // Solo contamos puntos en el tubo superior para evitar duplicados
+        if (t.pos.y === 0) {
+          puntuacion++;
+          t.puntuado = true;
+        }
       }
     });
 
-    // Generamos un tubo cada 1 segundo
-    k.loop(1, () => {
-      generarTubo();
+    // Generar tubos cada 1 segundo
+    instanciaJuego.loop(1, () => {
+      generarTubos();
     });
 
-    let puntuacion = 0;
-
-    // Mostramos la puntuación
-    const etiquetaPuntuacion = k.add([
-      k.text(puntuacion.toString()),
-      k.anchor("center"),
-      k.pos(k.width() / 2, 80),
-      k.fixed(),
-      k.z(100),
-      k.color(255, 255, 255),
+    // Mostrar puntuación en pantalla
+    const etiquetaPuntuacion = instanciaJuego.add([
+      instanciaJuego.text(puntuacion.toString()),
+      instanciaJuego.pos(24, 24),
+      instanciaJuego.fixed(),
+      instanciaJuego.color(255, 255, 255),
+      { value: puntuacion },
     ]);
 
-    function agregarPunto() {
-      puntuacion++;
-      etiquetaPuntuacion.text = puntuacion.toString();
-    }
+    // Actualizar texto de puntuación
+    etiquetaPuntuacion.onUpdate(() => {
+      if (etiquetaPuntuacion.value !== puntuacion) {
+        etiquetaPuntuacion.value = puntuacion;
+        etiquetaPuntuacion.text = puntuacion.toString();
+      }
+    });
   });
 
-  k.scene("perder", (puntuacion) => {
-    // Pantalla de fin del juego
-    k.add([
-      k.text("Fin del Juego", { size: 48 }),
-      k.pos(k.width() / 2, k.height() / 2 - 100),
-      k.anchor("center"),
-      k.color(255, 255, 255),
+  // Escena de fin de juego
+  instanciaJuego.scene("perder", (puntuacion) => {
+    instanciaJuego.add([
+      instanciaJuego.text("Fin del Juego"),
+      instanciaJuego.pos(
+        instanciaJuego.width() / 2,
+        instanciaJuego.height() / 2 - 80
+      ),
+      instanciaJuego.scale(2),
+      instanciaJuego.anchor("center"),
+      instanciaJuego.color(255, 255, 255),
     ]);
 
-    k.add([
-      k.circle(48),
-      k.color(255, 215, 0),
-      k.pos(k.width() / 2, k.height() / 2 - 50),
-      k.anchor("center"),
-      k.outline(4, k.Color.ORANGE),
+    // Mostrar puntuación final
+    instanciaJuego.add([
+      instanciaJuego.text(`Puntuación: ${puntuacion}`),
+      instanciaJuego.pos(
+        instanciaJuego.width() / 2,
+        instanciaJuego.height() / 2
+      ),
+      instanciaJuego.scale(1.5),
+      instanciaJuego.anchor("center"),
+      instanciaJuego.color(255, 255, 255),
     ]);
 
-    // Mostramos la puntuación final
-    k.add([
-      k.text("Puntuación: " + puntuacion, { size: 32 }),
-      k.pos(k.width() / 2, k.height() / 2 + 50),
-      k.anchor("center"),
-      k.color(255, 255, 255),
+    instanciaJuego.add([
+      instanciaJuego.text("Presiona ESPACIO o Haz Clic para Jugar de Nuevo"),
+      instanciaJuego.pos(
+        instanciaJuego.width() / 2,
+        instanciaJuego.height() / 2 + 80
+      ),
+      instanciaJuego.scale(1),
+      instanciaJuego.anchor("center"),
+      instanciaJuego.color(255, 255, 255),
     ]);
 
-    k.add([
-      k.text("Presiona ESPACIO o Haz Clic para Jugar de Nuevo", { size: 16 }),
-      k.pos(k.width() / 2, k.height() / 2 + 100),
-      k.anchor("center"),
-      k.color(255, 255, 255),
-    ]);
+    // Función para reiniciar el juego
+    function reiniciar() {
+      instanciaJuego.go("juego");
+    }
 
-    // Reiniciar juego
-    k.onKeyPress("space", () => k.go("juego"));
-    k.onClick(() => k.go("juego"));
+    // Controles para reiniciar
+    instanciaJuego.onKeyPress("space", reiniciar);
+    instanciaJuego.onClick(reiniciar);
   });
 
   // Iniciamos el juego
-  k.go("juego");
+  instanciaJuego.go("juego");
 
-  return k;
+  return instanciaJuego;
 }
 
 export function limpiarJuego() {
@@ -192,5 +225,6 @@ export function limpiarJuego() {
       console.warn("Error limpiando instancia del juego:", error);
     }
     instanciaJuego = null;
+    canvasEnUso = null;
   }
 }
