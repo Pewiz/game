@@ -153,6 +153,7 @@ export function iniciarJuegoFlappyBird(contenedor) {
       instanciaJuego.pos(24, 24),
       instanciaJuego.fixed(),
       instanciaJuego.color(255, 255, 255),
+      instanciaJuego.scale(1.5),
       { value: puntuacion },
     ]);
 
@@ -173,7 +174,7 @@ export function iniciarJuegoFlappyBird(contenedor) {
         instanciaJuego.width() / 2,
         instanciaJuego.height() / 2 - 80
       ),
-      instanciaJuego.scale(2),
+      instanciaJuego.scale(1.5),
       instanciaJuego.anchor("center"),
       instanciaJuego.color(255, 255, 255),
     ]);
@@ -185,7 +186,7 @@ export function iniciarJuegoFlappyBird(contenedor) {
         instanciaJuego.width() / 2,
         instanciaJuego.height() / 2
       ),
-      instanciaJuego.scale(1.5),
+      instanciaJuego.scale(1.2),
       instanciaJuego.anchor("center"),
       instanciaJuego.color(255, 255, 255),
     ]);
@@ -196,7 +197,7 @@ export function iniciarJuegoFlappyBird(contenedor) {
         instanciaJuego.width() / 2,
         instanciaJuego.height() / 2 + 80
       ),
-      instanciaJuego.scale(1),
+      instanciaJuego.scale(0.8),
       instanciaJuego.anchor("center"),
       instanciaJuego.color(255, 255, 255),
     ]);
