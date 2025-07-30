@@ -255,6 +255,25 @@ export function iniciarJuegoFlappyBird(contenedor) {
 
   // 🔄 Escena que se muestra cuando el jugador pierde
   instanciaJuego.scene("perder", (puntuacion) => {
+    // 🌅 Agregamos el mismo fondo que en el juego
+    try {
+      // Intentamos usar la imagen de fondo
+      instanciaJuego.add([
+        instanciaJuego.sprite("fondo"), // 🖼️ Imagen de fondo
+        instanciaJuego.pos(0, 0), // 📍 Posición en esquina superior izquierda
+        instanciaJuego.scale(
+          Math.max(
+            instanciaJuego.width() / 800, // Escalar según ancho
+            instanciaJuego.height() / 600 // Escalar según alto
+          )
+        ),
+        instanciaJuego.z(-100), // 🎭 Enviar al fondo (detrás de todo)
+      ]);
+    } catch {
+      // Si no se puede cargar la imagen, mantenemos el color de fondo predeterminado
+      console.log("Usando color de fondo predeterminado en Game Over");
+    }
+
     // 💀 Título "Fin del Juego"
     instanciaJuego.add([
       instanciaJuego.text("Fin del Juego"), // 📝 Texto principal
