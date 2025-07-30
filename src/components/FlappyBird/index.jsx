@@ -54,12 +54,10 @@ const FlappyBird = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-blue-400 to-blue-600">
       <div className="mb-4">
-        <h1 className="text-4xl font-bold text-white text-center mb-2">
+        <h1 className="text-3xl font-bold text-white text-center mb-2">
           🐦 Flappy Bird
         </h1>
-        <p className="text-white text-center">
-          ¡Presiona ESPACIO o Haz Clic para saltar!
-        </p>
+        <p className="text-white text-center">Desarrollado por</p>
       </div>
 
       <div className="border-4 border-white rounded-lg shadow-2xl overflow-hidden">
@@ -68,13 +66,6 @@ const FlappyBird = () => {
           className="block"
           style={{ imageRendering: "pixelated" }}
         />
-      </div>
-
-      <div className="mt-4 text-white text-center max-w-md">
-        <p className="text-sm">
-          ¡Navega el pájaro a través de los tubos! Evita chocar con los tubos o
-          el suelo.
-        </p>
       </div>
     </div>
   );

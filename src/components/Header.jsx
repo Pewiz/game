@@ -1,26 +1,57 @@
 function Header() {
-  return (
-    <header className="bg-blue-900 text-white shadow-lg">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo Universidad (placeholder) */}
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-              <span className="text-blue-900 font-bold text-xl">U</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">Universidad Ejemplo</h1>
-              <p className="text-blue-200 text-sm">Facultad de Ingeniería</p>
-            </div>
-          </div>
+  const name = "Taller de Programación - Ingeniería Civil en Informática";
+  const linkAdmision = "https://admision.ulagos.cl/Carreras/ingenieria-civil-en-informatica/";
 
-          {/* Información de la carrera */}
-          <div className="text-right">
-            <h2 className="text-lg font-semibold">Taller de Programación</h2>
-            <p className="text-blue-200">Ingeniería Civil Informática</p>
-          </div>
+  return (
+    <header className="bg-[#00275e] text-white min-h-[70px] xl:min-h-[87px] flex flex-col md:flex-row md:justify-around md:items-center gap-8 md:gap-0">
+        {/* Logo Universidad */}
+        <div className="flex justify-center md:justify-start">
+          <a 
+            href="https://www.ulagos.cl/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block"
+          >
+            <img
+              src="https://res.cloudinary.com/doq82xcpd/image/upload/v1730396958/hcdm7gwagrz84vth9uem.svg"
+              alt="Ulagos Logo"
+              className="h-auto max-h-12"
+            />
+          </a>
         </div>
-      </div>
+
+        {/* Título */}
+        <div className="text-center">
+          <h1 className="text-xl font-bold ">
+            {name}
+          </h1>
+        </div>
+
+        {/* Botón Admisión */}
+        <div className="flex justify-center md:justify-end">
+          <a 
+            href={linkAdmision} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-white "
+          >
+            <button className="
+              bg-[#295494] 
+              text-white 
+              font-medium 
+              text-[13px]
+              rounded-[5px]
+              border-none
+              outline-3 outline-[#295494] outline-offset-[-3px]
+              cursor-pointer
+              transition-all duration-400
+              hover:bg-[#ff4c00] hover:outline-[#ff4c00]
+              md:w-[90px] md:py-[9px]
+            ">
+              Admisión
+            </button>
+          </a>
+        </div>
     </header>
   );
 }
