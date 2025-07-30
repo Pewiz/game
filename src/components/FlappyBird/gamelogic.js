@@ -1,133 +1,133 @@
 import kaplay from "kaplay";
 
-// Global variable to track if KAPLAY is already initialized
-let gameInstance = null;
+// Variable global para rastrear si KAPLAY ya está inicializado
+let instanciaJuego = null;
 
-export function initFlappyBirdGame(container) {
-  // If there's already a game instance, clean it up first
-  if (gameInstance) {
+export function iniciarJuegoFlappyBird(contenedor) {
+  // Si ya hay una instancia del juego, la limpiamos primero
+  if (instanciaJuego) {
     try {
-      gameInstance.quit();
+      instanciaJuego.quit();
     } catch (error) {
-      console.warn("Error cleaning up previous game instance:", error);
+      console.warn("Error limpiando instancia anterior del juego:", error);
     }
-    gameInstance = null;
+    instanciaJuego = null;
   }
 
   const k = kaplay({
-    canvas: container,
+    canvas: contenedor,
     width: 800,
     height: 600,
-    background: [135, 206, 250], // Sky blue background
+    background: [135, 206, 250], // Fondo azul cielo
   });
 
-  // Store the instance globally
-  gameInstance = k;
+  // Guardamos la instancia globalmente
+  instanciaJuego = k;
 
-  // Define gravity
+  // Definimos la gravedad
   k.setGravity(3200);
 
-  k.scene("game", () => {
-    const PIPE_OPEN = 240;
-    const PIPE_MIN = 60;
-    const JUMP_FORCE = 800;
-    const SPEED = 320;
-    const CEILING = -60;
+  k.scene("juego", () => {
+    const ABERTURA_TUBO = 240;
+    const TUBO_MINIMO = 60;
+    const FUERZA_SALTO = 800;
+    const VELOCIDAD = 320;
+    const TECHO = -60;
 
-    // Create the bird using basic shapes instead of sprites
-    const bean = k.add([
+    // Creamos el pájaro usando formas básicas en lugar de sprites
+    const pajaro = k.add([
       k.circle(16),
-      k.color(255, 215, 0), // Gold color
+      k.color(255, 215, 0), // Color dorado
       k.pos(k.width() / 4, 0),
       k.area(),
       k.body(),
       k.outline(2, k.Color.ORANGE),
     ]);
 
-    // Add eyes to the bird
+    // Agregamos ojos al pájaro
     k.add([
       k.circle(3),
       k.color(0, 0, 0),
       k.pos(k.width() / 4 - 6, -6),
-      k.follow(bean, k.vec2(-6, -6)),
+      k.follow(pajaro, k.vec2(-6, -6)),
     ]);
 
-    // Check for fall death
-    bean.onUpdate(() => {
-      if (bean.pos.y >= k.height() || bean.pos.y <= CEILING) {
-        k.go("lose", score);
+    // Verificamos si el pájaro se cae y muere
+    pajaro.onUpdate(() => {
+      if (pajaro.pos.y >= k.height() || pajaro.pos.y <= TECHO) {
+        k.go("perder", puntuacion);
       }
     });
 
-    // Jump controls
+    // Controles de salto
     k.onKeyPress("space", () => {
-      bean.jump(JUMP_FORCE);
+      pajaro.jump(FUERZA_SALTO);
     });
 
     k.onGamepadButtonPress("south", () => {
-      bean.jump(JUMP_FORCE);
+      pajaro.jump(FUERZA_SALTO);
     });
 
-    // Mobile tap
+    // Toque móvil
     k.onClick(() => {
-      bean.jump(JUMP_FORCE);
+      pajaro.jump(FUERZA_SALTO);
     });
 
-    function spawnPipe() {
-      // Calculate pipe positions
-      const h1 = k.rand(PIPE_MIN, k.height() - PIPE_MIN - PIPE_OPEN);
-      const h2 = k.height() - h1 - PIPE_OPEN;
+    function generarTubo() {
+      // Calculamos las posiciones de los tubos
+      const h1 = k.rand(TUBO_MINIMO, k.height() - TUBO_MINIMO - ABERTURA_TUBO);
+      const h2 = k.height() - h1 - ABERTURA_TUBO;
 
-      // Top pipe
+      // Tubo superior
       k.add([
         k.pos(k.width(), 0),
         k.rect(64, h1),
         k.color(0, 127, 255),
         k.outline(4),
         k.area(),
-        k.move(k.LEFT, SPEED),
+        k.move(k.LEFT, VELOCIDAD),
         k.offscreen({ destroy: true }),
-        "pipe",
+        "tubo",
       ]);
 
-      // Bottom pipe
+      // Tubo inferior
       k.add([
-        k.pos(k.width(), h1 + PIPE_OPEN),
+        k.pos(k.width(), h1 + ABERTURA_TUBO),
         k.rect(64, h2),
         k.color(0, 127, 255),
         k.outline(4),
         k.area(),
-        k.move(k.LEFT, SPEED),
+        k.move(k.LEFT, VELOCIDAD),
         k.offscreen({ destroy: true }),
-        "pipe",
-        { passed: false },
+        "tubo",
+        { pasado: false },
       ]);
     }
 
-    // Collision with pipes
-    bean.onCollide("pipe", () => {
-      k.go("lose", score);
-      k.addKaboom(bean.pos);
+    // Colisión con tubos
+    pajaro.onCollide("tubo", () => {
+      k.go("perder", puntuacion);
+      k.addKaboom(pajaro.pos);
     });
 
-    // Check if bean passed the pipe
-    k.onUpdate("pipe", (p) => {
-      if (p.pos.x + p.width <= bean.pos.x && p.passed === false) {
-        addScore();
-        p.passed = true;
+    // Verificamos si el pájaro pasó el tubo
+    k.onUpdate("tubo", (t) => {
+      if (t.pos.x + t.width <= pajaro.pos.x && t.pasado === false) {
+        agregarPunto();
+        t.pasado = true;
       }
     });
 
-    // Spawn a pipe every 1 second
+    // Generamos un tubo cada 1 segundo
     k.loop(1, () => {
-      spawnPipe();
+      generarTubo();
     });
 
-    let score = 0;
+    let puntuacion = 0;
 
-    // Display score
-    const scoreLabel = k.add([
-      k.text(score.toString()),
+    // Mostramos la puntuación
+    const etiquetaPuntuacion = k.add([
+      k.text(puntuacion.toString()),
       k.anchor("center"),
       k.pos(k.width() / 2, 80),
       k.fixed(),
@@ -135,16 +135,16 @@ export function initFlappyBirdGame(container) {
       k.color(255, 255, 255),
     ]);
 
-    function addScore() {
-      score++;
-      scoreLabel.text = score.toString();
+    function agregarPunto() {
+      puntuacion++;
+      etiquetaPuntuacion.text = puntuacion.toString();
     }
   });
 
-  k.scene("lose", (score) => {
-    // Game over screen
+  k.scene("perder", (puntuacion) => {
+    // Pantalla de fin del juego
     k.add([
-      k.text("Game Over", { size: 48 }),
+      k.text("Fin del Juego", { size: 48 }),
       k.pos(k.width() / 2, k.height() / 2 - 100),
       k.anchor("center"),
       k.color(255, 255, 255),
@@ -158,39 +158,39 @@ export function initFlappyBirdGame(container) {
       k.outline(4, k.Color.ORANGE),
     ]);
 
-    // Display final score
+    // Mostramos la puntuación final
     k.add([
-      k.text("Score: " + score, { size: 32 }),
+      k.text("Puntuación: " + puntuacion, { size: 32 }),
       k.pos(k.width() / 2, k.height() / 2 + 50),
       k.anchor("center"),
       k.color(255, 255, 255),
     ]);
 
     k.add([
-      k.text("Press SPACE or Click to Play Again", { size: 16 }),
+      k.text("Presiona ESPACIO o Haz Clic para Jugar de Nuevo", { size: 16 }),
       k.pos(k.width() / 2, k.height() / 2 + 100),
       k.anchor("center"),
       k.color(255, 255, 255),
     ]);
 
-    // Restart game
-    k.onKeyPress("space", () => k.go("game"));
-    k.onClick(() => k.go("game"));
+    // Reiniciar juego
+    k.onKeyPress("space", () => k.go("juego"));
+    k.onClick(() => k.go("juego"));
   });
 
-  // Start the game
-  k.go("game");
+  // Iniciamos el juego
+  k.go("juego");
 
   return k;
 }
 
-export function cleanupGame() {
-  if (gameInstance) {
+export function limpiarJuego() {
+  if (instanciaJuego) {
     try {
-      gameInstance.quit();
+      instanciaJuego.quit();
     } catch (error) {
-      console.warn("Error cleaning up game instance:", error);
+      console.warn("Error limpiando instancia del juego:", error);
     }
-    gameInstance = null;
+    instanciaJuego = null;
   }
 }

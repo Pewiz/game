@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { initFlappyBirdGame, cleanupGame } from "./gameLogic.js";
+import { iniciarJuegoFlappyBird, limpiarJuego } from "./gameLogic.js";
 
 const FlappyBird = () => {
   const canvasRef = useRef(null);
@@ -9,31 +9,31 @@ const FlappyBird = () => {
   useEffect(() => {
     if (canvasRef.current && !gameRef.current && !initializedRef.current) {
       try {
-        // Initialize the game
+        // Inicializamos el juego
         initializedRef.current = true;
-        gameRef.current = initFlappyBirdGame(canvasRef.current);
+        gameRef.current = iniciarJuegoFlappyBird(canvasRef.current);
       } catch (error) {
-        console.error("Error initializing game:", error);
+        console.error("Error inicializando el juego:", error);
         initializedRef.current = false;
       }
     }
 
-    // Add window cleanup listener
-    const handleBeforeUnload = () => {
-      cleanupGame();
+    // Agregamos listener para limpiar antes de cerrar la ventana
+    const manejarAntesDeCerrar = () => {
+      limpiarJuego();
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", manejarAntesDeCerrar);
 
-    // Cleanup function
+    // Función de limpieza
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", manejarAntesDeCerrar);
 
       if (gameRef.current || initializedRef.current) {
         try {
-          cleanupGame();
+          limpiarJuego();
         } catch (error) {
-          console.error("Error quitting game:", error);
+          console.error("Error cerrando el juego:", error);
         }
         gameRef.current = null;
         initializedRef.current = false;
@@ -47,7 +47,9 @@ const FlappyBird = () => {
         <h1 className="text-4xl font-bold text-white text-center mb-2">
           🐦 Flappy Bird
         </h1>
-        <p className="text-white text-center">Press SPACE or Click to jump!</p>
+        <p className="text-white text-center">
+          ¡Presiona ESPACIO o Haz Clic para saltar!
+        </p>
       </div>
 
       <div className="border-4 border-white rounded-lg shadow-2xl overflow-hidden">
@@ -60,8 +62,8 @@ const FlappyBird = () => {
 
       <div className="mt-4 text-white text-center max-w-md">
         <p className="text-sm">
-          Navigate the bird through the pipes! Avoid hitting the pipes or the
-          ground.
+          ¡Navega el pájaro a través de los tubos! Evita chocar con los tubos o
+          el suelo.
         </p>
       </div>
     </div>
