@@ -204,8 +204,3 @@ Una vez que termines este taller, puedes:
 **¡Recuerda:** La programación es como aprender un nuevo idioma. Al principio puede parecer confuso, pero con práctica se vuelve más claro. ¡Lo más importante es divertirse mientras aprendes!
 
 **🎮 ¡Que disfrutes creando tu juego! 🚀**
-
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
