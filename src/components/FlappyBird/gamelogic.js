@@ -64,11 +64,31 @@ export function iniciarJuegoFlappyBird(contenedor) {
     "/assets/tubo.png" // URL de la imagen del tubo
   );
 
+  // 🎵 Cargamos la música de fondo del juego
+  instanciaJuego.loadSound(
+    "musica",
+    "/assets/music.mp3" // URL de la música de fondo
+  );
+
   // ============================================================================
   // 🎮 SECCIÓN 3: CONFIGURACIÓN DE VARIABLES DEL JUEGO (5 minutos)
   // ============================================================================
 
   instanciaJuego.scene("juego", () => {
+    // 🔇 Pausar toda la música anterior antes de empezar
+    try {
+      instanciaJuego.audio.ctx.resume(); // Reanudar contexto de audio si está suspendido
+      // Detener todos los sonidos que puedan estar reproduciéndose
+      if (instanciaJuego.audio) {
+        instanciaJuego.audio.masterNode.disconnect();
+        instanciaJuego.audio.masterNode.connect(
+          instanciaJuego.audio.ctx.destination
+        );
+      }
+    } catch {
+      // Si hay error con el audio, continuar
+    }
+
     // 🎯 Variables que controlan la dificultad del juego
     const ABERTURA_TUBO = 240; // 📏 Espacio entre tubos (más grande = más fácil)
     const TUBO_MINIMO = 60; // 📏 Altura mínima de los tubos
@@ -111,6 +131,20 @@ export function iniciarJuegoFlappyBird(contenedor) {
     // 📊 Variable para contar los puntos del jugador
     let puntuacion = 0;
 
+    // 🎵 Variable para controlar la música
+    let musicaActual = null;
+
+    // 🎵 Reproducir música de fondo (en bucle y con volumen moderado)
+    try {
+      musicaActual = instanciaJuego.play("musica", {
+        loop: true, // 🔄 Repetir la música indefinidamente
+        volume: 0.3, // 🔊 Volumen al 30% para no ser molesta
+      });
+    } catch {
+      // Si no se puede cargar la música, continuamos sin ella
+      console.log("Música no disponible, continuando sin audio");
+    }
+
     // ============================================================================
     // 🎯 SECCIÓN 5: CONTROLES Y MOVIMIENTO (8 minutos)
     // ============================================================================
@@ -119,6 +153,10 @@ export function iniciarJuegoFlappyBird(contenedor) {
     pajaro.onUpdate(() => {
       // Si toca el suelo o el techo invisible, ¡GAME OVER!
       if (pajaro.pos.y >= instanciaJuego.height() || pajaro.pos.y <= TECHO) {
+        // 🔇 Pausar la música cuando pierde
+        if (musicaActual) {
+          musicaActual.stop(); // 🛑 Detener la música
+        }
         instanciaJuego.go("perder", puntuacion); // 🔄 Cambia a la pantalla de "Game Over"
       }
     });
@@ -205,6 +243,10 @@ export function iniciarJuegoFlappyBird(contenedor) {
 
     // 💀 ¡Detectamos cuando el pájaro choca con un tubo!
     pajaro.onCollide("tubo", () => {
+      // 🔇 Pausar la música cuando pierde
+      if (musicaActual) {
+        musicaActual.stop(); // 🛑 Detener la música
+      }
       instanciaJuego.go("perder", puntuacion); // 🔄 Game Over
       instanciaJuego.addKaboom(pajaro.pos); // 💥 Explosión visual
     });
@@ -237,6 +279,7 @@ export function iniciarJuegoFlappyBird(contenedor) {
       instanciaJuego.fixed(), // 📌 No se mueve con la cámara
       instanciaJuego.color(255, 255, 255), // ⚪ Color blanco
       instanciaJuego.scale(1.5), // 🔍 Hacer el texto más grande
+      instanciaJuego.z(100), // 🎭 En primer plano (delante de todo)
       { value: puntuacion }, // 💾 Guardar valor actual
     ]);
 
