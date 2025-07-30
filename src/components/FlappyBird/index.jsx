@@ -55,7 +55,7 @@ const FlappyBird = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-blue-400 to-blue-600">
       <div className="mb-4">
         <h1 className="text-3xl font-bold text-white text-center mb-2">
-          🐦 Flappy Bird
+          Flappy Bird 🐦
         </h1>
         <p className="text-white text-center">Desarrollado por</p>
       </div>
