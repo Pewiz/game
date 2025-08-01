@@ -38,7 +38,7 @@ function configurarFondo(k) {
     k.add([
       k.sprite("fondo"),
       k.pos(0, 0),
-      k.scale(Math.max(k.width() / 600, k.height() / 450)), // Ajustado para nuevas dimensiones
+      k.scale(Math.max(k.width() / 800, k.height() / 600)),
       k.z(-100),
     ]);
   } catch {
@@ -53,7 +53,7 @@ function crearPajaro(k) {
     k.pos(k.width() / 4, 0),
     k.area(),
     k.body(),
-    k.scale(0.6), // Reducido de 0.8 a 0.6 (25% más pequeño)
+    k.scale(0.6),
   ]);
 }
 
@@ -61,10 +61,10 @@ function crearPajaro(k) {
 function crearInterfazPuntuacion(k, puntuacion) {
   return k.add([
     k.text(puntuacion.toString()),
-    k.pos(18, 18), // Reducido de 24, 24 a 18, 18
+    k.pos(18, 18),
     k.fixed(),
     k.color(255, 255, 255),
-    k.scale(1), // Reducido de 1.5 a 1.2
+    k.scale(1),
     k.z(100),
     { value: puntuacion },
   ]);
@@ -224,8 +224,8 @@ function pantallaGameOver(k, puntuacion) {
   // Título de Game Over
   k.add([
     k.text("Fin del Juego"),
-    k.pos(k.width() / 2, k.height() / 2 - 60), // Reducido de -80 a -60
-    k.scale(1.2), // Reducido de 1.5 a 1.2
+    k.pos(k.width() / 2, k.height() / 2 - 60),
+    k.scale(1),
     k.anchor("center"),
     k.color(255, 255, 255),
   ]);
@@ -234,7 +234,7 @@ function pantallaGameOver(k, puntuacion) {
   k.add([
     k.text(`Puntuación: ${puntuacion}`),
     k.pos(k.width() / 2, k.height() / 2),
-    k.scale(1.0), // Reducido de 1.2 a 1.0
+    k.scale(0.8),
     k.anchor("center"),
     k.color(255, 255, 255),
   ]);
@@ -242,8 +242,8 @@ function pantallaGameOver(k, puntuacion) {
   // Instrucciones para reiniciar
   k.add([
     k.text("Presiona ESPACIO o Haz Clic para Jugar de Nuevo"),
-    k.pos(k.width() / 2, k.height() / 2 + 60), // Reducido de +80 a +60
-    k.scale(0.7), // Reducido de 0.8 a 0.7
+    k.pos(k.width() / 2, k.height() / 2 + 60),
+    k.scale(0.6),
     k.anchor("center"),
     k.color(255, 255, 255),
   ]);
@@ -332,8 +332,8 @@ export function iniciarJuegoFlappyBird(contenedor) {
   if (!instanciaJuego) {
     const k = kaplay({
       canvas: contenedor,
-      width: 600, // Reducido de 800 a 600
-      height: 450, // Reducido de 600 a 450 (mantiene proporción 4:3)
+      width: 600,
+      height: 450,
       background: [135, 206, 250],
     });
 
@@ -342,7 +342,7 @@ export function iniciarJuegoFlappyBird(contenedor) {
   }
 
   // Configurar gravedad
-  instanciaJuego.setGravity(2400); // Reducido de 3200 a 2400 (proporcionalmente)
+  instanciaJuego.setGravity(2400);
 
   // Cargar recursos del juego
   cargarRecursos(instanciaJuego);
