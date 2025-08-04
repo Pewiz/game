@@ -46,7 +46,7 @@ Ve a `http://localhost:5179` y ¡verás tu juego funcionando!
 📏 **Redimensionar imágenes:** https://www.iloveimg.com/es/redimensionar-imagen#resize-options,pixels
 
 - Usa esta herramienta para ajustar el tamaño de tus sprites (pájaro, tubos, fondo)
-- Recomendado: Pájaro 64x64 píxeles, Tubos 64x320 píxeles
+- Recomendado: Pájaro 70x50 píxeles, Tubos 32x100 píxeles
 
 ### 🎨 Para Elegir Colores
 
