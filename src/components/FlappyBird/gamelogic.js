@@ -6,13 +6,13 @@ import kaplay from "kaplay";
 let instanciaJuego = null;
 let canvasEnUso = null;
 
-// CONFIGURACIÓN DE VARIABLES DEL JUEGO (que los estudiantes pueden modificar fácilmente)
+// CONFIGURACIÓN DE VARIABLES DEL JUEGO
 const CONFIGURACION_JUEGO = {
-  ABERTURA_TUBO: 180, // Espacio entre tubos (reducido de 240 a 180)
-  TUBO_MINIMO: 45, // Altura mínima de tubo (reducido de 60 a 45)
-  FUERZA_SALTO: 600, // Fuerza del salto del pájaro (reducido de 800 a 600)
-  VELOCIDAD: 240, // Velocidad de movimiento de los tubos (reducido de 320 a 240)
-  TECHO: -45, // Límite superior del juego (reducido de -60 a -45)
+  ABERTURA_TUBO: 180, // Espacio entre tubos
+  TUBO_MINIMO: 45, // Altura mínima de tubo
+  FUERZA_SALTO: 600, // Fuerza del salto del pájaro
+  VELOCIDAD: 240, // Velocidad de movimiento de los tubos
+  TECHO: -45, // Límite superior del juego
   VOLUMEN_MUSICA: 0.3, // Volumen de la música de fondo
 };
 
