@@ -1,133 +1,232 @@
-# 📖 Guía para Estudiantes - Flappy Bird
+# 🐦 Taller de Programación: Flappy Bird
 
-## 🔧 Configuración del Juegos
+¡Bienvenido al taller de programación! Hoy aprenderás a crear tu propio juego Flappy Bird mientras descubres los conceptos básicos de la programación.
 
-En la parte superior del archivo encontrarás `CONFIGURACION_JUEGO`. Aquí puedes cambiar los parámetros del juego:
+## 🎯 ¿Qué vamos a aprender?
 
-```javascript
-const CONFIGURACION_JUEGO = {
-  ABERTURA_TUBO: 240, // Espacio entre tubos (más grande = más fácil)
-  TUBO_MINIMO: 60, // Altura mínima de tubo
-  FUERZA_SALTO: 800, // Fuerza del salto del pájaro (más alto = salta más)
-  VELOCIDAD: 320, // Velocidad de movimiento de los tubos (más alto = más difícil)
-  TECHO: -60, // Límite superior del juego
-  VOLUMEN_MUSICA: 0.3, // Volumen de la música de fondo (0.0 a 1.0)
-};
+En este taller descubrirás:
+
+- **Variables**: Como "cajas" donde guardamos información
+- **Funciones**: Como "máquinas" que hacen trabajos específicos
+- **Eventos**: Como responder cuando el jugador presiona teclas
+- **Lógica**: Como hacer que el juego tome decisiones
+- **Creatividad**: Como personalizar tu juego
+
+## 🚀 ¿Cómo empezar?
+
+### 1. Preparar tu computadora
+
+```bash
+# 1. Abre la terminal y ve a la carpeta del proyecto
+cd ruta/al/proyecto
+
+# 2. Instala las dependencias (solo la primera vez)
+npm install
+
+# 3. Inicia el juego
+npm run dev
 ```
 
-## 📂 Funciones Principales que Puedes Modificar
+### 2. Abre tu navegador
 
-### 🎨 Elementos Visuales
+Ve a `http://localhost:5179` y ¡verás tu juego funcionando!
 
-- **`configurarFondo(k)`**: Cambia el fondo del juego
-- **`crearPajaro(k)`**: Modifica la apariencia y posición inicial del pájaro
-- **`crearInterfazPuntuacion(k, puntuacion)`**: Personaliza cómo se ve la puntuación
+## 🎮 ¿Cómo jugar?
 
-### 🎵 Audio
+- **ESPACIO** o **CLICK**: Hacer saltar al pájaro
+- **Objetivo**: Pasar por los tubos sin chocar
+- **Meta**: ¡Conseguir la puntuación más alta!
 
-- **`reproducirMusica(k)`**: Cambia la música de fondo o el volumen
+--
 
-### 🚧 Obstáculos
+## � Herramientas Útiles para Personalizar tu Juego
 
-- **`crearTubo(k, x, y, altura, invertido)`**: Modifica la apariencia de los tubos
-- **`generarTubos(k)`**: Cambia cómo y cuándo aparecen los tubos
+### 🖼️ Para Redimensionar Imágenes
 
-### 🎮 Controles
+📏 **Redimensionar imágenes:** https://www.iloveimg.com/es/redimensionar-imagen#resize-options,pixels
 
-- **`configurarControles(k, pajaro, musicaActual, puntuacionRef)`**: Modifica los controles del juego
+- Usa esta herramienta para ajustar el tamaño de tus sprites (pájaro, tubos, fondo)
+- Recomendado: Pájaro 64x64 píxeles, Tubos 64x320 píxeles
 
-### 💥 Colisiones
+### 🎨 Para Elegir Colores
 
-- **`configurarColisionesYPuntuacion(k, pajaro, musicaActual, puntuacionRef, etiquetaPuntuacion)`**: Cambia qué pasa cuando el pájaro choca
+🌈 **Selector de colores RGB:** https://www.google.com/search?q=rgb+color+picker&oq=rgb+color+picker
 
-## 🖥️ Pantallas (Menos Modificables)
+- Usa esta herramienta para encontrar los valores RGB de los colores que quieras
+- Los colores en el código se escriben como: `k.color(255, 0, 0)` (Rojo, Verde, Azul)
 
-### 🎯 Pantalla de Game Over
+---
 
-- **`pantallaGameOver(k, puntuacion)`**: Ya está completamente configurada, pero puedes cambiar los textos o colores
+## 🔧 ¿Cómo personalizar tu juego?
 
-## 🎯 Ejemplos de Modificaciones Comunes
+### Cambiar el color del pájaro
 
-### 1. Hacer el Juego Más Fácil
+Busca esta línea en el código:
 
 ```javascript
-const CONFIGURACION_JUEGO = {
-  ABERTURA_TUBO: 300, // Más espacio entre tubos
-  FUERZA_SALTO: 900, // Salta más alto
-  VELOCIDAD: 250, // Tubos más lentos
-  // ... resto de configuración
-};
+k.color(255, 215, 0), // Color dorado
 ```
 
-### 2. Cambiar el Sprite del Pájaro
+Cambia los números para diferentes colores:
+
+- `k.color(255, 0, 0)` = Rojo
+- `k.color(0, 255, 0)` = Verde
+- `k.color(0, 0, 255)` = Azul
+- `k.color(255, 0, 255)` = Rosa
+
+### Cambiar el tamaño del pájaro
+
+Busca esta línea:
 
 ```javascript
-function crearPajaro(k) {
-  return k.add([
-    k.sprite("pajaro"), // Cambia "pajaro" por otro sprite
-    k.pos(k.width() / 4, 0),
-    k.area(),
-    k.body(),
-    k.scale(1.2), // Cambia el tamaño (0.8 = más pequeño, 1.2 = más grande)
-  ]);
+k.circle(16), // Tamaño del pájaro
+```
+
+- Número más grande = Pájaro más grande
+- Número más pequeño = Pájaro más pequeño
+
+### Hacer el juego más fácil o difícil
+
+```javascript
+const VELOCIDAD = 320; // Cambiar para más rápido/lento
+const ABERTURA_TUBO = 240; // Cambiar para abertura más grande/pequeña
+const FUERZA_SALTO = 800; // Cambiar para salto más fuerte/débil
+```
+
+### Cambiar la gravedad
+
+```javascript
+k.setGravity(3200); // Número más alto = cae más rápido
+```
+
+## 📚 Conceptos que aprenderás
+
+### Variables - Las "Cajas de Datos"
+
+```javascript
+let puntuacion = 0; // Guarda un número
+let velocidad = 320; // Guarda la velocidad
+let colorPajaro = "dorado"; // Guarda texto
+```
+
+**¿Qué son?** Como cajas etiquetadas donde guardamos información que podemos usar después.
+
+### Funciones - Las "Máquinas Trabajadoras"
+
+```javascript
+function saltarPajaro() {
+  pajaro.jump(FUERZA_SALTO);
 }
 ```
 
-### 3. Cambiar los Controles
+**¿Qué son?** Como máquinas que hacen un trabajo específico cuando las "encendemos".
+
+### Eventos - Los "Detectores de Acciones"
 
 ```javascript
-function configurarControles(k, pajaro, musicaActual, puntuacionRef) {
-  function saltar() {
-    pajaro.jump(CONFIGURACION_JUEGO.FUERZA_SALTO);
-  }
-
-  // Agregar más controles
-  k.onKeyPress("space", saltar);
-  k.onKeyPress("w", saltar); // Agregar tecla W
-  k.onKeyPress("up", saltar); // Agregar flecha arriba
-  k.onClick(saltar);
-}
+k.onKeyPress("space", () => {
+  saltarPajaro(); // Esto pasa cuando presionas espacio
+});
 ```
 
-### 4. Personalizar el Game Over
+**¿Qué son?** Como sensores que detectan cuando haces algo (clic, tecla, etc.).
+
+### Bucles - Los "Repetidores Automáticos"
 
 ```javascript
-function pantallaGameOver(k, puntuacion) {
-  configurarFondo(k);
-
-  // Cambiar el título
-  k.add([
-    k.text("¡Has Perdido!"), // Texto personalizado
-    k.pos(k.width() / 2, k.height() / 2 - 80),
-    k.scale(1.5),
-    k.anchor("center"),
-    k.color(255, 0, 0), // Color rojo
-  ]);
-
-  // Resto del código...
-}
+k.loop(1, () => {
+  generarTubo(); // Esto se repite cada segundo
+});
 ```
 
-## 💡 Consejos para Estudiantes
+**¿Qué son?** Como alarmas que hacen que algo se repita automáticamente.
 
-1. **Comienza con `CONFIGURACION_JUEGO`**: Es la forma más fácil de cambiar el comportamiento del juego
-2. **Experimenta con los valores**: Cambia un número a la vez y observa qué pasa
-3. **Lee los comentarios**: Cada función tiene comentarios que explican qué hace
-4. **No tengas miedo de romper algo**: Siempre puedes volver a la versión original
+## 🎨 Retos Creativos
 
-## 🚀 Funciones que NO Deberías Modificar (a menos que sepas lo que haces)
+### Reto 1: Pájaro Multicolor
 
-- `iniciarJuegoFlappyBird(contenedor)`: Es la función principal que inicia todo
-- `limpiarJuego()`: Se encarga de limpiar la memoria cuando el juego termina
-- `configurarEscenaJuego(k)`: Coordina todas las partes del juego
+¿Puedes hacer que el pájaro tenga diferentes colores?
 
-## 📝 Estructura de Archivos de Recursos
+### Reto 2: Juego Más Fácil
 
-Asegúrate de que tienes estos archivos en tu carpeta `public/assets/`:
+Haz que la abertura entre tubos sea más grande para principiantes.
 
-- `pajaro.png` - Sprite del pájaro
-- `fondo.jpg` - Imagen de fondo
-- `tubo.png` - Sprite de los tubos
-- `music.mp3` - Música de fondo
+### Reto 3: Súper Velocidad
 
-¡Diviértete modificando el juego! 🎮
+¿Qué pasa si haces que todo vaya súper rápido?
+
+### Reto 4: Gravedad Espacial
+
+Prueba con gravedad muy baja, ¡como si fuera en el espacio!
+
+## 🐛 ¿Algo no funciona?
+
+### El juego no aparece
+
+1. ¿Está corriendo `npm run dev`?
+2. ¿Vas a la dirección correcta en el navegador?
+3. ¿Hay algún error en la consola?
+
+### Hice un cambio pero no se ve
+
+1. ¿Guardaste el archivo? (Ctrl+S)
+2. ¿Refrescaste el navegador? (F5)
+
+### El código tiene errores
+
+1. Revisa que no falten comas `,`
+2. Revisa que los paréntesis estén balanceados `()`
+3. ¡Pide ayuda al instructor!
+
+## 🎯 Estructura del Código
+
+### Archivos principales:
+
+- `src/components/FlappyBird/gameLogic.js` - La lógica del juego
+- `src/components/FlappyBird/index.jsx` - La interfaz de usuario
+- `src/App.jsx` - La aplicación principal
+
+### Secciones del código:
+
+1. **Configuración inicial** - Crear el mundo del juego
+2. **Crear el pájaro** - Darle forma, color y física
+3. **Controles** - Detectar cuando presionas teclas
+4. **Generar tubos** - Crear obstáculos automáticamente
+5. **Detectar colisiones** - Saber cuándo el pájaro choca
+6. **Sistema de puntuación** - Contar puntos
+7. **Pantalla de fin** - Mostrar cuando pierdes
+
+## 🌟 ¿Qué sigue después?
+
+Una vez que termines este taller, puedes:
+
+- Crear más juegos con KAPLAY
+- Aprender más JavaScript
+- Explorar React para interfaces web
+- Hacer tu propia página web
+- ¡Continuar tu aventura en la programación!
+
+## 🤝 ¿Necesitas ayuda?
+
+- Levanta la mano si tienes dudas
+- Trabaja en equipo con tus compañeros
+- ¡Los errores son normales y parte del aprendizaje!
+- Experimenta y diviértete
+
+## 📖 Recursos adicionales
+
+- [Scratch](https://scratch.mit.edu/) - Programación visual para principiantes
+- [Code.org](https://code.org/) - Cursos gratuitos de programación
+- [KAPLAY Docs](https://kaplayjs.com/) - Documentación oficial de KAPLAY
+
+---
+
+**¡Recuerda:** La programación es como aprender un nuevo idioma. Al principio puede parecer confuso, pero con práctica se vuelve más claro. ¡Lo más importante es divertirse mientras aprendes!
+
+**🎮 ¡Que disfrutes creando tu juego! 🚀**+ Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vi**🎮 ¡Que disfrutes creando tu juego! 🚀**
