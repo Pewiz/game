@@ -37,9 +37,9 @@ Ve a `http://localhost:5179` y ¡verás tu juego funcionando!
 - **Objetivo**: Pasar por los tubos sin chocar
 - **Meta**: ¡Conseguir la puntuación más alta!
 
---
 
-## � Herramientas Útiles para Personalizar tu Juego
+---
+## Herramientas Útiles para Personalizar tu Juego
 
 ### 🖼️ Para Redimensionar Imágenes
 
